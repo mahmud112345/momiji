@@ -1,0 +1,38 @@
+name: Ceviri APK
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'ceviri-*.zip'
+      - '.github/workflows/ceviri-build.yml'
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: android-actions/setup-android@v3
+      - name: Araçlar
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-protobuf protobuf-compiler
+          pip install --break-system-packages grpcio-tools protobuf || true
+      - name: Çeviri yamasını uygula
+        run: |
+          unzip -o 'ceviri-*.zip' -d .
+          python3 patch.py
+      - name: Derle
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleFdroidDebug --no-daemon
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Momiji-Ceviri-apk
+          path: android/app/build/outputs/apk/**/*.apk
