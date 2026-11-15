@@ -1,9 +1,9 @@
-name: Ceviri APK
+name: Oyunca APK
 on:
   workflow_dispatch:
   push:
     paths:
-      - 'ceviri-*.zip'
+      - 'oyunca-*.zip'
       - '.github/workflows/ceviri-build.yml'
 jobs:
   build:
@@ -17,14 +17,15 @@ jobs:
         with:
           distribution: temurin
           java-version: 17
+      - uses: android-actions/setup-android@v3
       - name: Araçlar
         run: |
           sudo apt-get update
           sudo apt-get install -y python3-protobuf protobuf-compiler
           pip install --break-system-packages grpcio-tools protobuf || true
-      - name: Çeviri yamasını uygula
+      - name: Yamayı uygula
         run: |
-          unzip -o 'ceviri-*.zip' -d .
+          unzip -o 'oyunca-*.zip' -d .
           python3 patch.py
       - name: Derle
         working-directory: android
@@ -33,5 +34,5 @@ jobs:
           ./gradlew assembleFdroidDebug --no-daemon
       - uses: actions/upload-artifact@v4
         with:
-          name: Momiji-Ceviri-apk
+          name: Oyunca-apk
           path: android/app/build/outputs/apk/**/*.apk
